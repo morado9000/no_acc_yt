@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(const MyApp());
 
@@ -8,18 +11,54 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              ImageSection(image: '', name: ''),
-              ButtonSection(title: "", image: "", views: ""),
-            ],
-          )
-        ),
-      ),
+      home: HomePage()
     );
   }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+   @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage>{
+  List _items = [];
+  List _avatar = [];
+
+  Future<void> readJson() async {
+    final String response = await rootBundle.loadString('assets/data.json');
+    final data = await json.decode(response);
+    setState(() {
+      _avatar = data["avatar"];
+      _items = data["videos"];
+    });
+  }
+  
+  @override
+  void initState(){
+    super.initState();
+    readJson();
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+        body: SingleChildScrollView(
+          child: 
+          (_items.isNotEmpty && _avatar.isNotEmpty) ?
+            Column(
+            children: [
+              ImageSection(image: _avatar[0]['image'], name: _avatar[0]['name']),
+              ButtonSection(title: _items[0]["title"], image: _items[0]["image"], views: _items[0]["views"]),
+            ],
+          )
+          : const Column()
+        ),
+      );
+  }
+
 }
 
 
